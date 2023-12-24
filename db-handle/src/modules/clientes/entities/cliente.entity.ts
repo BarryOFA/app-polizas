@@ -23,6 +23,27 @@ export class Cliente extends Document {
     required: true,
   })
   historial_sinistros: number
+
+  @Prop({
+    required: true,
+    unique: true,
+  })
+  patente: string
+
+  @Prop({
+    required: true,
+  })
+  marca: string
+
+  @Prop({
+    required: true,
+  })
+  modelo: string
+
+  @Prop({
+    required: true,
+  })
+  anio: number
 }
 
 export const ClienteSchema = SchemaFactory.createForClass(Cliente)

@@ -12,4 +12,16 @@ export class CreateClienteDto {
 
   @IsNumber()
   historial_sinistros: number
+
+  @IsString()
+  patente: string
+
+  @IsString()
+  marca: string
+
+  @IsString()
+  modelo: string
+
+  @IsNumber()
+  anio: number
 }

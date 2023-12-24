@@ -4,31 +4,19 @@ import {
   Param,
   Body,
   Post,
-  Put,
   Patch,
   Delete,
 } from '@nestjs/common'
 import { ClientesService } from './clientes.service'
 import { ApiSecurity, ApiTags } from '@nestjs/swagger'
-import { ClientesDto } from 'src/modules/clientes/dto/cliente.dto'
-import { ConfigService } from '@nestjs/config'
 import { CreateClienteDto } from './dto/create.dto'
-// import { query } from 'express'
-
-let NAME: string
-let MESSAGE: string
+import { UpdateClienteDto } from './dto/update.dto'
 
 @ApiSecurity('Api-Key')
 @ApiTags('Clientes')
 @Controller('api/v1/Clientes')
 export class ClientesController {
-  constructor(
-    private readonly clientesService: ClientesService,
-    private config: ConfigService,
-  ) {
-    NAME = `[${this.config.get<string>('app.applicationName')}]`
-    MESSAGE = `${NAME} No se pudo conectar con la base de datos`
-  }
+  constructor(private readonly clientesService: ClientesService) {}
 
   @Post()
   createCliente(@Body() body: CreateClienteDto) {
@@ -36,7 +24,7 @@ export class ClientesController {
   }
 
   @Get()
-  getAllClientes() {
+  findAll() {
     return this.clientesService.findAll()
   }
 
@@ -46,8 +34,11 @@ export class ClientesController {
   }
 
   @Patch(':id')
-  updateCliente(@Param('id') id: string, @Body() body: ClientesDto) {
-    return this.clientesService.update(id, body)
+  updateCliente(
+    @Param('id') id: string,
+    @Body() updateCliente: UpdateClienteDto,
+  ) {
+    return this.clientesService.update(id, updateCliente)
   }
 
   @Delete(':id')
