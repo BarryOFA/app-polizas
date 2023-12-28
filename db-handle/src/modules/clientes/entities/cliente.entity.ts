@@ -44,6 +44,9 @@ export class Cliente extends Document {
     required: true,
   })
   anio: number
+
+  @Prop({ default: 100000 })
+  valor: number
 }
 
 export const ClienteSchema = SchemaFactory.createForClass(Cliente)

@@ -39,6 +39,7 @@ export class ClientesController {
     @Param('id') id: string,
     @Body() updateCliente: UpdateClienteDto,
   ) {
+    console.log(updateCliente)
     return this.clientesService.update(id, updateCliente)
   }
 

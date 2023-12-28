@@ -1,4 +1,4 @@
-import { IsString, IsNumber } from 'class-validator'
+import { IsString, IsNumber, IsOptional, Min } from 'class-validator'
 
 export class CreateClienteDto {
   @IsString()
@@ -24,4 +24,9 @@ export class CreateClienteDto {
 
   @IsNumber()
   anio: number
+
+  @IsOptional()
+  @Min(100000)
+  @IsNumber()
+  valor: number
 }

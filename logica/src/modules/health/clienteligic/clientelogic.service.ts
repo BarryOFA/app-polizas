@@ -2,14 +2,12 @@ import {
   BadRequestException,
   Injectable,
   Inject,
-  ServiceUnavailableException,
-  NotFoundException,
   InternalServerErrorException,
 } from '@nestjs/common'
 import { HttpService } from '@nestjs/axios'
 import applicationConfig from 'src/config/config'
 import * as dotenv from 'dotenv'
-import { firstValueFrom, retry, timeout } from 'rxjs'
+import { firstValueFrom, retry } from 'rxjs'
 import { CreateClienteDto } from './dto/create-clientelogic.dto'
 import { UpdateClienteDto } from './dto/update-clientelogic.dto'
 import { ConfigType } from '@nestjs/config'
@@ -18,7 +16,7 @@ import { PaginationDto } from 'src/commons/dto/pagination.dto'
 dotenv.config()
 
 @Injectable()
-export class ManangerUserTicketService {
+export class ClientelogicService {
   constructor(
     @Inject(applicationConfig.KEY)
     private readonly appConfig: ConfigType<typeof applicationConfig>,
@@ -38,8 +36,11 @@ export class ManangerUserTicketService {
         this.httpService
           .post(`${this.appConfig.dbBaseUrl}`, createClienteDto, httpOptions)
           .pipe(
-            timeout(Number(this.appConfig.httpTimeout)),
-            retry(Number(this.appConfig.retries)),
+            retry({
+              count: +this.appConfig.retries,
+              delay: +this.appConfig.retriesDelay,
+              resetOnSuccess: true,
+            }),
           ),
       )
       return response.data
@@ -58,13 +59,15 @@ export class ManangerUserTicketService {
     }
     try {
       const response = await firstValueFrom(
-        this.httpService
-          .get(`${this.appConfig.dbBaseUrl}`, httpOptions)
-          .pipe(
-            timeout(Number(this.appConfig.httpTimeout)),
-            retry(Number(this.appConfig.retries)),
-          ),
+        this.httpService.get(`${this.appConfig.dbBaseUrl}`, httpOptions).pipe(
+          retry({
+            count: +this.appConfig.retries,
+            delay: +this.appConfig.retriesDelay,
+            resetOnSuccess: true,
+          }),
+        ),
       )
+
       return response.data
     } catch (error) {
       console.log(error)
@@ -87,8 +90,11 @@ export class ManangerUserTicketService {
         this.httpService
           .get(`${this.appConfig.dbBaseUrl}/${term}`, httpOptions)
           .pipe(
-            timeout(Number(this.appConfig.httpTimeout)),
-            retry(Number(this.appConfig.retries)),
+            retry({
+              count: +this.appConfig.retries,
+              delay: +this.appConfig.retriesDelay,
+              resetOnSuccess: true,
+            }),
           ),
       )
       return response.data
@@ -118,8 +124,11 @@ export class ManangerUserTicketService {
             httpOptions,
           )
           .pipe(
-            timeout(Number(this.appConfig.httpTimeout)),
-            retry(Number(this.appConfig.retries)),
+            retry({
+              count: +this.appConfig.retries,
+              delay: +this.appConfig.retriesDelay,
+              resetOnSuccess: true,
+            }),
           ),
       )
       return response.data
@@ -144,8 +153,11 @@ export class ManangerUserTicketService {
         this.httpService
           .delete(`${this.appConfig.dbBaseUrl}/${id}`, httpOptions)
           .pipe(
-            timeout(Number(this.appConfig.httpTimeout)),
-            retry(Number(this.appConfig.retries)),
+            retry({
+              count: +this.appConfig.retries,
+              delay: +this.appConfig.retriesDelay,
+              resetOnSuccess: true,
+            }),
           ),
       )
       return response.data
@@ -158,6 +170,55 @@ export class ManangerUserTicketService {
       )
     }
   }
+
+  async validatePoliza(trace: string, id: string) {
+    const httpOptions = {
+      headers: {
+        apiKey: this.appConfig.apiKey,
+        trace: trace,
+      },
+    }
+    try {
+      const response = await firstValueFrom(
+        this.httpService
+          .get(`${this.appConfig.dbBaseUrl}/${id}`, httpOptions)
+          .pipe(
+            retry({
+              count: +this.appConfig.retries,
+              delay: +this.appConfig.retriesDelay,
+              resetOnSuccess: true,
+            }),
+          ),
+      )
+      const edad = response.data.edad
+      const siniestros = response.data.siniestros
+
+      if (edad >= 18) {
+        const habilitado = true
+        const calculoValor = +siniestros * 10000
+        const informe = {
+          habilitado: habilitado,
+          valor: calculoValor,
+        }
+        return informe
+      } else {
+        const informe = 'Cliente cumple los requisitos necesarios'
+        return {
+          informe,
+          response: response.data,
+        }
+      }
+    } catch (error) {
+      console.log(error)
+      throw new BadRequestException(
+        `Error listando los clientes : ${JSON.stringify(
+          error.response?.data || error.message,
+        )}`,
+      )
+    }
+  }
+
+  //   Service criterio poliza
 
   private handleExceptions(error: any) {
     if (error.code === 11000) {

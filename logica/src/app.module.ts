@@ -1,4 +1,3 @@
-import { join } from 'path'
 import {
   MiddlewareConsumer,
   Module,
@@ -6,7 +5,6 @@ import {
   RequestMethod,
 } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
-import { ServeStaticModule } from '@nestjs/serve-static'
 import appConfig from './config/config'
 import { HealthModule } from './modules/health/health.module'
 import { ConfigModule, ConfigService } from '@nestjs/config'
@@ -16,6 +14,7 @@ import { ApikeyMiddleware } from './commons/middleware/apikey.middleware'
 import { APP_INTERCEPTOR } from '@nestjs/core'
 import { ResponseInterceptor } from './commons/interceptors/response.interceptor'
 import { HttpModule } from '@nestjs/axios'
+import { ClientelogicModule } from './modules/health/clienteligic/clientelogic.module'
 
 @Module({
   imports: [
@@ -39,15 +38,8 @@ import { HttpModule } from '@nestjs/axios'
       global: true,
     },
 
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'),
-    }),
-
-    MongooseModule.forRoot(process.env.MONGODB, {
-      dbName: 'ACLCluster',
-    }),
-
     HealthModule,
+    ClientelogicModule,
   ],
   controllers: [],
   providers: [
