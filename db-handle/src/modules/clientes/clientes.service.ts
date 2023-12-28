@@ -3,9 +3,6 @@ import {
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common'
-// import { HttpService } from '@nestjs/axios'
-// import applicationConfig from '../../config/config'
-// import { ConfigType } from '@nestjs/config'
 import { CreateClienteDto } from './dto/create.dto'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
@@ -18,9 +15,13 @@ export class ClientesService {
     @InjectModel('Cliente') private readonly clienteModel: Model<Cliente>,
   ) {}
 
-  async create(cliente: CreateClienteDto): Promise<any> {
-    const createdCliente = new this.clienteModel(cliente)
-    return await createdCliente.save()
+  async create(createClienteDto: CreateClienteDto): Promise<any> {
+    try {
+      const createdCliente = new this.clienteModel(createClienteDto)
+      return await createdCliente.save()
+    } catch (error) {
+      throw new BadRequestException('error al crear cliente')
+    }
   }
 
   findAll() {
@@ -49,7 +50,11 @@ export class ClientesService {
     return existingCliente
   }
 
-  async delete(id: string): Promise<any> {
-    return await this.clienteModel.findByIdAndDelete(id).exec()
+  async remove(id: string) {
+    const result = await this.clienteModel.deleteOne({ _id: id })
+    if (result.deletedCount === 0) {
+      throw new BadRequestException('Cliennte no encontrada')
+    }
+    return result
   }
 }

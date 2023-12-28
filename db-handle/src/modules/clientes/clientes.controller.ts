@@ -11,6 +11,7 @@ import { ClientesService } from './clientes.service'
 import { ApiSecurity, ApiTags } from '@nestjs/swagger'
 import { CreateClienteDto } from './dto/create.dto'
 import { UpdateClienteDto } from './dto/update.dto'
+import { ParseMongoIdPipe } from '../../commons/pipes/parse-mongo-id.pipes'
 
 @ApiSecurity('Api-Key')
 @ApiTags('Clientes')
@@ -19,8 +20,8 @@ export class ClientesController {
   constructor(private readonly clientesService: ClientesService) {}
 
   @Post()
-  createCliente(@Body() body: CreateClienteDto) {
-    return this.clientesService.create(body)
+  createCliente(@Body() createClienteDto: CreateClienteDto) {
+    return this.clientesService.create(createClienteDto)
   }
 
   @Get()
@@ -42,7 +43,7 @@ export class ClientesController {
   }
 
   @Delete(':id')
-  deleteCliente(@Param('id') id: string) {
-    return this.clientesService.delete(id)
+  remove(@Param('id', ParseMongoIdPipe) id: string) {
+    return this.clientesService.remove(id)
   }
 }

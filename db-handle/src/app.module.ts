@@ -5,7 +5,6 @@ import {
   RequestMethod,
 } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
-// import { ServeStaticModule } from '@nestjs/serve-static'
 import appConfig from './config/config'
 import { HealthModule } from './modules/health/health.module'
 import { ConfigModule, ConfigService } from '@nestjs/config'
@@ -16,8 +15,6 @@ import { APP_INTERCEPTOR } from '@nestjs/core'
 import { ResponseInterceptor } from './commons/interceptors/response.interceptor'
 import { HttpModule } from '@nestjs/axios'
 import { ClientesModule } from './modules/clientes/clientes.module'
-import { VehiculosModule } from './modules/vehiculos/vehiculos.module'
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -48,7 +45,6 @@ import { VehiculosModule } from './modules/vehiculos/vehiculos.module'
     }),
     HealthModule,
     ClientesModule,
-    VehiculosModule,
   ],
   controllers: [],
   providers: [

@@ -10,5 +10,10 @@ export default registerAs('app', () => ({
   httpTimeout: env.AXIOS_HTTP_TIMEOUT,
   retries: env.AXIOS_RETRIES,
   retriesDelay: env.AXIOS_DELAY_BETWEEN_RETRIES,
-  microserviceBBaseUrl: env.MICROSERVICE_A_BASE_URL,
+  organizationBaseUrl: env.ORGANIZATION_BASE_URL,
+  organizationGetUrl: env.ORGANIZATION_GET,
+  organizationEmailGetUrl: env.ORGANIZATION_EMAIL_GET,
+  organizationGetAllUrl: env.ORGANIZATION_GET_ALL,
+  mongoDbURL: env.MONGODB,
+  dbBaseUrl: env.dbBaseUrl,
 }))
