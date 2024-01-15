@@ -24,17 +24,14 @@ export class ClientelogicService {
   ) {}
 
   async create(trace: string, createClienteDto: CreateClienteDto) {
-    const httpOptions = {
-      headers: {
-        apiKey: this.appConfig.apiKey,
-        trace: trace,
-      },
-    }
-
     try {
       const response = await firstValueFrom(
         this.httpService
-          .post(`${this.appConfig.dbBaseUrl}`, createClienteDto, httpOptions)
+          .post(
+            `${this.appConfig.dbBaseUrl}`,
+            createClienteDto,
+            this.getHttpOptions(trace),
+          )
           .pipe(
             retry({
               count: +this.appConfig.retries,
@@ -51,17 +48,13 @@ export class ClientelogicService {
 
   async findAll(trace: string, paginationDto: PaginationDto) {
     const httpOptions = {
-      headers: {
-        apiKey: this.appConfig.apiKey,
-        trace: trace,
-      },
+      ...this.getHttpOptions(trace),
       params: paginationDto,
     }
     try {
       const response = await firstValueFrom(
         this.httpService.get(`${this.appConfig.dbBaseUrl}`, httpOptions).pipe(
           retry({
-            count: +this.appConfig.retries,
             delay: +this.appConfig.retriesDelay,
             resetOnSuccess: true,
           }),
@@ -78,17 +71,15 @@ export class ClientelogicService {
       )
     }
   }
+
   async findOne(trace: string, term: string) {
-    const httpOptions = {
-      headers: {
-        apiKey: this.appConfig.apiKey,
-        trace: trace,
-      },
-    }
     try {
       const response = await firstValueFrom(
         this.httpService
-          .get(`${this.appConfig.dbBaseUrl}/${term}`, httpOptions)
+          .get(
+            `${this.appConfig.dbBaseUrl}/${term}`,
+            this.getHttpOptions(trace),
+          )
           .pipe(
             retry({
               count: +this.appConfig.retries,
@@ -97,7 +88,7 @@ export class ClientelogicService {
             }),
           ),
       )
-      return response.data
+      return response.data.data
     } catch (error) {
       console.log(error)
       throw new BadRequestException(
@@ -109,19 +100,13 @@ export class ClientelogicService {
   }
 
   async update(trace: string, id: string, updateClienteDto: UpdateClienteDto) {
-    const httpOptions = {
-      headers: {
-        apiKey: this.appConfig.apiKey,
-        trace: trace,
-      },
-    }
     try {
       const response = await firstValueFrom(
         this.httpService
           .patch(
             `${this.appConfig.dbBaseUrl}/${id}`,
             updateClienteDto,
-            httpOptions,
+            this.getHttpOptions(trace),
           )
           .pipe(
             retry({
@@ -142,25 +127,23 @@ export class ClientelogicService {
     }
   }
   async remove(trace: string, id: string) {
-    const httpOptions = {
-      headers: {
-        apiKey: this.appConfig.apiKey,
-        trace: trace,
-      },
-    }
     try {
       const response = await firstValueFrom(
         this.httpService
-          .delete(`${this.appConfig.dbBaseUrl}/${id}`, httpOptions)
+          .delete(
+            `${this.appConfig.dbBaseUrl}/${id}`,
+            this.getHttpOptions(trace),
+          )
           .pipe(
             retry({
               count: +this.appConfig.retries,
+
               delay: +this.appConfig.retriesDelay,
               resetOnSuccess: true,
             }),
           ),
       )
-      return response.data
+      return response.data.data
     } catch (error) {
       console.log(error)
       throw new BadRequestException(
@@ -178,6 +161,7 @@ export class ClientelogicService {
         trace: trace,
       },
     }
+
     try {
       const response = await firstValueFrom(
         this.httpService
@@ -190,22 +174,38 @@ export class ClientelogicService {
             }),
           ),
       )
+
       const edad = response.data.edad
-      const siniestros = response.data.siniestros
+      const historialSinistros = response.data.historial_sinistros
 
       if (edad >= 18) {
-        const habilitado = true
-        const calculoValor = +siniestros * 10000
+        let aumento = 0
+        switch (historialSinistros) {
+          case 1:
+            aumento = 0.1
+            break
+          case 2:
+            aumento = 0.2
+            break
+          case 3:
+            aumento = 0.3
+            break
+          default:
+            aumento = 0
+            break
+        }
+
+        const valorAumentado = historialSinistros * 10000 * (1 + aumento)
         const informe = {
-          habilitado: habilitado,
-          valor: calculoValor,
+          habilitado: true,
+          valor: valorAumentado,
         }
         return informe
       } else {
-        const informe = 'Cliente cumple los requisitos necesarios'
+        const informe = 'El cliente es apto para la poliza'
         return {
           informe,
-          response: response.data,
+          response: response.data.data,
         }
       }
     } catch (error) {
@@ -217,8 +217,6 @@ export class ClientelogicService {
       )
     }
   }
-
-  //   Service criterio poliza
 
   private handleExceptions(error: any) {
     if (error.code === 11000) {
@@ -232,5 +230,24 @@ export class ClientelogicService {
     throw new InternalServerErrorException(
       `No se puede crar cliente - Ver server logs`,
     )
+  }
+
+  // private getIncrementHistorical(increment: number) {
+  //   const INCREMENTO_HISTORIAL = {
+  //     1: 0.1,
+  //     2: 0.2,
+  //     3: 0.3,
+  //   }
+  //   let aumento = INCREMENTO_HISTORIAL[increment]
+  //   return aumento
+  // }
+
+  private getHttpOptions(trace: string) {
+    return {
+      headers: {
+        apiKey: this.appConfig.apiKey,
+        trace: trace,
+      },
+    }
   }
 }

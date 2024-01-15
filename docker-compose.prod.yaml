@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  db-handler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: db-handler-docker
+    container_name: db-handler
+    restart: always # reiniciar el contenedor si se detiene
+    ports:
+      - "${PORT}:${PORT}"
+    # working_dir: /var/www/pokedex
+
+    env_file:
+      - ./src/config/env/.env
+    # environment:
+    #   APPLICATION_NAME: ${APPLICATION_NAME}
+    #   API_KEY: ${API_KEY}
+    #   MONGODB: ${MONGODB}
+    #   DEFAULT_LIMIT: ${DEFAULT_LIMIT}
+    #   RETRY_DELAY: ${RETRY_DELAY}
+    #   RETRY_ATTEMPTS: ${RETRY_ATTEMPTS}
+    #   POOL_SIZE: ${POOL_SIZE}
+    #   CONNECTION_TIMEOUT: ${CONNECTION_TIMEOUT}
+    #   QUERY_TIMEOUT: ${QUERY_TIMEOUT}
+    #   STATEMENT_TIMEOUT: ${STATEMENT_TIMEOUT}
+    #   PAGINATION_PAGE: ${PAGINATION_PAGE}
+    #   PAGINATION_LIMIT: ${PAGINATION_LIMIT}
+    #   PORT=3001: ${PORT}
+    #   dbBaseUrl: ${dbBaseUrl}
+    #   USER: ${USER}
+    #   PASSWORD: ${PASSWORD}
+

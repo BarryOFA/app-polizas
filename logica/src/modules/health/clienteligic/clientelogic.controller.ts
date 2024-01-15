@@ -63,6 +63,4 @@ export class ClientelogicController {
     const trace = req.headers.trace as string
     return this.clientelogicService.validatePoliza(trace, id)
   }
-
-  //   Controller criterio poliza
 }
