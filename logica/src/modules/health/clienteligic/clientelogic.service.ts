@@ -238,7 +238,14 @@ export class ClientelogicService {
   //     2: 0.2,
   //     3: 0.3,
   //   }
+
   //   let aumento = INCREMENTO_HISTORIAL[increment]
+
+  //   if (aumento === undefined) {
+  //     console.error('Valor de increment no válido')
+  //     // Puedes manejar este caso devolviendo un valor predeterminado o lanzando una excepción, según tus necesidades.
+  //   }
+
   //   return aumento
   // }
 

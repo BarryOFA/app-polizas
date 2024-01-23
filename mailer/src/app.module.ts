@@ -4,6 +4,7 @@ import {
   NestModule,
   RequestMethod,
 } from '@nestjs/common'
+import { MongooseModule } from '@nestjs/mongoose'
 import appConfig from './config/config'
 import { HealthModule } from './modules/health/health.module'
 import { ConfigModule, ConfigService } from '@nestjs/config'
@@ -12,9 +13,7 @@ import { LoggerMiddleware } from './commons/middleware/logger.middleware'
 import { ApikeyMiddleware } from './commons/middleware/apikey.middleware'
 import { APP_INTERCEPTOR } from '@nestjs/core'
 import { ResponseInterceptor } from './commons/interceptors/response.interceptor'
-import { OrganizationsModule } from './modules/organizations/organizations.module'
 import { HttpModule } from '@nestjs/axios'
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -36,8 +35,11 @@ import { HttpModule } from '@nestjs/axios'
       }),
       global: true,
     },
+
+    MongooseModule.forRoot(process.env.MONGODB, {
+      dbName: 'Cluster0',
+    }),
     HealthModule,
-    OrganizationsModule,
   ],
   controllers: [],
   providers: [
